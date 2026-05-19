@@ -9,8 +9,50 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WorkspaceRouteImport } from './routes/workspace'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as NotificationsRouteImport } from './routes/notifications'
+import { Route as FindTransportRouteImport } from './routes/find-transport'
+import { Route as CarriersRouteImport } from './routes/carriers'
+import { Route as CargoDetailsRouteImport } from './routes/cargo-details'
+import { Route as ActiveCargosRouteImport } from './routes/active-cargos'
 import { Route as IndexRouteImport } from './routes/index'
 
+const WorkspaceRoute = WorkspaceRouteImport.update({
+  id: '/workspace',
+  path: '/workspace',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FindTransportRoute = FindTransportRouteImport.update({
+  id: '/find-transport',
+  path: '/find-transport',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CarriersRoute = CarriersRouteImport.update({
+  id: '/carriers',
+  path: '/carriers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CargoDetailsRoute = CargoDetailsRouteImport.update({
+  id: '/cargo-details',
+  path: '/cargo-details',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ActiveCargosRoute = ActiveCargosRouteImport.update({
+  id: '/active-cargos',
+  path: '/active-cargos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -19,28 +61,130 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/active-cargos': typeof ActiveCargosRoute
+  '/cargo-details': typeof CargoDetailsRoute
+  '/carriers': typeof CarriersRoute
+  '/find-transport': typeof FindTransportRoute
+  '/notifications': typeof NotificationsRoute
+  '/profile': typeof ProfileRoute
+  '/workspace': typeof WorkspaceRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/active-cargos': typeof ActiveCargosRoute
+  '/cargo-details': typeof CargoDetailsRoute
+  '/carriers': typeof CarriersRoute
+  '/find-transport': typeof FindTransportRoute
+  '/notifications': typeof NotificationsRoute
+  '/profile': typeof ProfileRoute
+  '/workspace': typeof WorkspaceRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/active-cargos': typeof ActiveCargosRoute
+  '/cargo-details': typeof CargoDetailsRoute
+  '/carriers': typeof CarriersRoute
+  '/find-transport': typeof FindTransportRoute
+  '/notifications': typeof NotificationsRoute
+  '/profile': typeof ProfileRoute
+  '/workspace': typeof WorkspaceRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/active-cargos'
+    | '/cargo-details'
+    | '/carriers'
+    | '/find-transport'
+    | '/notifications'
+    | '/profile'
+    | '/workspace'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/active-cargos'
+    | '/cargo-details'
+    | '/carriers'
+    | '/find-transport'
+    | '/notifications'
+    | '/profile'
+    | '/workspace'
+  id:
+    | '__root__'
+    | '/'
+    | '/active-cargos'
+    | '/cargo-details'
+    | '/carriers'
+    | '/find-transport'
+    | '/notifications'
+    | '/profile'
+    | '/workspace'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ActiveCargosRoute: typeof ActiveCargosRoute
+  CargoDetailsRoute: typeof CargoDetailsRoute
+  CarriersRoute: typeof CarriersRoute
+  FindTransportRoute: typeof FindTransportRoute
+  NotificationsRoute: typeof NotificationsRoute
+  ProfileRoute: typeof ProfileRoute
+  WorkspaceRoute: typeof WorkspaceRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/workspace': {
+      id: '/workspace'
+      path: '/workspace'
+      fullPath: '/workspace'
+      preLoaderRoute: typeof WorkspaceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/find-transport': {
+      id: '/find-transport'
+      path: '/find-transport'
+      fullPath: '/find-transport'
+      preLoaderRoute: typeof FindTransportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/carriers': {
+      id: '/carriers'
+      path: '/carriers'
+      fullPath: '/carriers'
+      preLoaderRoute: typeof CarriersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cargo-details': {
+      id: '/cargo-details'
+      path: '/cargo-details'
+      fullPath: '/cargo-details'
+      preLoaderRoute: typeof CargoDetailsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/active-cargos': {
+      id: '/active-cargos'
+      path: '/active-cargos'
+      fullPath: '/active-cargos'
+      preLoaderRoute: typeof ActiveCargosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -53,17 +197,14 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ActiveCargosRoute: ActiveCargosRoute,
+  CargoDetailsRoute: CargoDetailsRoute,
+  CarriersRoute: CarriersRoute,
+  FindTransportRoute: FindTransportRoute,
+  NotificationsRoute: NotificationsRoute,
+  ProfileRoute: ProfileRoute,
+  WorkspaceRoute: WorkspaceRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
