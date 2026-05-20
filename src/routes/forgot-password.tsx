@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { sendPasswordResetLink } from "@/lib/firebase/auth";
 import { AuthShell, Field } from "./login";
 import { Loader2, ArrowRight, MailCheck } from "lucide-react";
 
@@ -18,12 +18,14 @@ function ForgotPasswordPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true); setError(null);
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin + "/login",
-    });
-    setLoading(false);
-    if (error) { setError(error.message); return; }
-    setSent(true);
+    try {
+      await sendPasswordResetLink(email, window.location.origin + "/login");
+      setSent(true);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : String(error));
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (

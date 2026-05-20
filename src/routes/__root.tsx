@@ -4,12 +4,15 @@ import {
   createRootRouteWithContext,
   useRouter,
   useRouterState,
+  useNavigate,
   Link,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import appCss from "../styles.css?url";
 import { AppShell } from "@/components/layout/AppShell";
+import { observeAuthState } from "@/lib/firebase/auth";
 
 const PUBLIC_PREFIXES = ["/login", "/register", "/forgot-password", "/onboarding", "/cabinet"];
 const LANDING_PATH = "/";
@@ -82,7 +85,38 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {isPublic ? <Outlet /> : <AppShell><Outlet /></AppShell>}
+      {isPublic ? (
+        <Outlet />
+      ) : (
+        <ProtectedAppShell>
+          <Outlet />
+        </ProtectedAppShell>
+      )}
     </QueryClientProvider>
   );
+}
+
+function ProtectedAppShell({ children }: { children: React.ReactNode }) {
+  const navigate = useNavigate();
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    return observeAuthState((user) => {
+      if (!user) {
+        navigate({ to: "/login" });
+        return;
+      }
+      setChecking(false);
+    });
+  }, [navigate]);
+
+  if (checking) {
+    return (
+      <div className="grid min-h-screen place-items-center bg-background text-[13px] text-muted-foreground">
+        Checking session...
+      </div>
+    );
+  }
+
+  return <AppShell>{children}</AppShell>;
 }

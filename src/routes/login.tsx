@@ -1,8 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { JukBarLogo } from "@/components/jukbar/Logo";
-import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
+import { signInWithEmail, signInWithGoogle } from "@/lib/firebase/auth";
 import { Loader2, ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/login")({
@@ -20,17 +19,26 @@ function LoginPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true); setError(null);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
-    if (error) { setError(error.message); return; }
-    navigate({ to: "/cabinet" });
+    try {
+      await signInWithEmail(email, password);
+      navigate({ to: "/cabinet" });
+    } catch (error) {
+      setError(error instanceof Error ? error.message : String(error));
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function handleGoogle() {
     setLoading(true); setError(null);
-    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/cabinet" });
-    if (result.error) { setError(String(result.error)); setLoading(false); return; }
-    if (!result.redirected) navigate({ to: "/cabinet" });
+    try {
+      await signInWithGoogle();
+      navigate({ to: "/cabinet" });
+    } catch (error) {
+      setError(error instanceof Error ? error.message : String(error));
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (

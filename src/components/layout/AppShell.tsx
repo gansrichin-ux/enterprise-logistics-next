@@ -1,9 +1,11 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard, PackageSearch, Truck, Users, Bell, Building2,
   LayoutGrid, Search, Command, Plus, ChevronDown, Menu, X, Globe2,
+  LogOut,
 } from "lucide-react";
 import { useState } from "react";
+import { logout } from "@/lib/firebase/auth";
 
 const nav = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -19,11 +21,17 @@ const secondary = [
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
+  const navigate = useNavigate();
   const path = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
 
   const isActive = (to: string) =>
     to === "/" ? path === "/" : path.startsWith(to);
+
+  async function handleLogout() {
+    await logout();
+    navigate({ to: "/" });
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -147,6 +155,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <div className="font-mono text-[10px] text-muted-foreground">Carrier-Forwarder</div>
               </div>
             </div>
+            <button onClick={handleLogout} className="rounded-md border border-border bg-surface/70 p-2 hover:bg-surface-2" title="Logout">
+              <LogOut className="h-4 w-4" />
+            </button>
           </div>
         </header>
 

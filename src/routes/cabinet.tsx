@@ -1,8 +1,11 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { doc, getDoc } from "firebase/firestore";
 import { JukBarLogo } from "@/components/jukbar/Logo";
 import { RouteMap } from "@/components/jukbar/RouteMap";
+import { observeAuthState, logout } from "@/lib/firebase/auth";
+import { getDb } from "@/lib/firebase/firestore";
+import { getRoleLabel } from "@/lib/roles";
 import {
   Loader2, ShieldCheck, MapPin, Phone, Mail, Building2, FileText,
   Settings, LogOut, Bell, Activity, Truck, Package, CheckCircle2, Plus,
@@ -12,12 +15,6 @@ export const Route = createFileRoute("/cabinet")({
   head: () => ({ meta: [{ title: "Cabinet — Jük Bar" }] }),
   component: CabinetPage,
 });
-
-const ROLE_LABEL: Record<string, string> = {
-  carrier: "Carrier", logistician: "Logistician", cargo_owner: "Cargo owner",
-  forwarder: "Forwarder", carrier_forwarder: "Carrier-Forwarder",
-  cargo_owner_carrier: "Cargo owner-Carrier", logistician_carrier: "Logistician-Carrier",
-};
 
 const TABS = ["Overview", "Company", "Documents", "Activity", "Settings"] as const;
 type Tab = (typeof TABS)[number];
@@ -35,17 +32,37 @@ function CabinetPage() {
   } | null>(null);
 
   useEffect(() => {
-    (async () => {
-      const { data } = await supabase.auth.getUser();
-      if (!data.user) { navigate({ to: "/login" }); return; }
-      const { data: prof } = await supabase.from("profiles").select("*").eq("id", data.user.id).maybeSingle();
-      setProfile(prof as never);
-      setLoading(false);
-    })();
+    return observeAuthState(async (user) => {
+      if (!user) {
+        navigate({ to: "/login" });
+        return;
+      }
+
+      try {
+        const snap = await getDoc(doc(getDb(), "users", user.uid));
+        const data = snap.exists() ? snap.data() : null;
+        setProfile({
+          id: user.uid,
+          full_name: (data?.name as string | undefined) ?? user.displayName ?? null,
+          phone: null,
+          email: (data?.email as string | undefined) ?? user.email ?? null,
+          company_name: null,
+          company_description: null,
+          city: null,
+          region: null,
+          country: null,
+          primary_role: (data?.role as string | undefined) ?? null,
+          verification_status: (data?.profileStatus as string | undefined) ?? "pending",
+          completion_percent: (data?.profileCompletenessPercent as number | undefined) ?? 10,
+        });
+      } finally {
+        setLoading(false);
+      }
+    });
   }, [navigate]);
 
   async function handleLogout() {
-    await supabase.auth.signOut();
+    await logout();
     navigate({ to: "/" });
   }
 
@@ -64,7 +81,7 @@ function CabinetPage() {
   }
 
   const initials = (profile.full_name || profile.email || "JB").split(" ").map((s) => s[0]).join("").slice(0, 2).toUpperCase();
-  const roleLabel = ROLE_LABEL[profile.primary_role ?? ""] ?? "—";
+  const roleLabel = profile.primary_role ? getRoleLabel(profile.primary_role) : "—";
   const location = [profile.city, profile.region, profile.country].filter(Boolean).join(", ");
   const verified = profile.verification_status === "verified";
 

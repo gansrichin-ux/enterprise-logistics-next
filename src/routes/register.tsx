@@ -1,8 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { AuthShell, Field, Divider, GoogleIcon } from "./login";
+import { registerWithEmail, signInWithGoogle } from "@/lib/firebase/auth";
+import { APP_ROLES, getRoleLabel } from "@/lib/roles";
 import { Loader2, ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/register")({
@@ -10,20 +10,12 @@ export const Route = createFileRoute("/register")({
   component: RegisterPage,
 });
 
-const ROLES = [
-  { v: "carrier", l: "Carrier" },
-  { v: "logistician", l: "Logistician" },
-  { v: "cargo_owner", l: "Cargo owner" },
-  { v: "forwarder", l: "Forwarder" },
-  { v: "carrier_forwarder", l: "Carrier-Forwarder" },
-  { v: "cargo_owner_carrier", l: "Cargo owner-Carrier" },
-  { v: "logistician_carrier", l: "Logistician-Carrier" },
-];
+const ROLES = APP_ROLES.map((role) => ({ v: role, l: getRoleLabel(role) }));
 
 function RegisterPage() {
   const navigate = useNavigate();
   const [form, setForm] = useState({
-    full_name: "", email: "", phone: "", company_name: "", primary_role: "carrier", password: "",
+    full_name: "", username: "", email: "", phone: "", company_name: "", primary_role: "carrier", password: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,29 +25,32 @@ function RegisterPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true); setError(null);
-    const { error } = await supabase.auth.signUp({
+    try {
+      await registerWithEmail({
       email: form.email,
       password: form.password,
-      options: {
-        emailRedirectTo: window.location.origin + "/onboarding",
-        data: {
-          full_name: form.full_name,
-          phone: form.phone,
-          company_name: form.company_name,
-          primary_role: form.primary_role,
-        },
-      },
-    });
-    setLoading(false);
-    if (error) { setError(error.message); return; }
-    navigate({ to: "/onboarding" });
+        fullName: form.full_name,
+        username: form.username,
+        role: form.primary_role,
+      });
+      navigate({ to: "/cabinet" });
+    } catch (error) {
+      setError(error instanceof Error ? error.message : String(error));
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function handleGoogle() {
     setLoading(true); setError(null);
-    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/onboarding" });
-    if (result.error) { setError(String(result.error)); setLoading(false); return; }
-    if (!result.redirected) navigate({ to: "/onboarding" });
+    try {
+      await signInWithGoogle();
+      navigate({ to: "/cabinet" });
+    } catch (error) {
+      setError(error instanceof Error ? error.message : String(error));
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -69,6 +64,9 @@ function RegisterPage() {
             <input required value={form.phone} onChange={upd("phone")} className="auth-input" placeholder="+49 40 1234567" />
           </Field>
         </div>
+        <Field label="Username">
+          <input required value={form.username} onChange={upd("username")} className="auth-input" placeholder="erik_vogel" />
+        </Field>
         <Field label="Work email">
           <input type="email" required value={form.email} onChange={upd("email")} className="auth-input" placeholder="dispatch@yourcompany.eu" />
         </Field>
