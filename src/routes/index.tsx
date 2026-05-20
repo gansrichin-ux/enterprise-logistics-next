@@ -1,224 +1,265 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Card, PageHeader, StatusBadge, Btn, MapPreview } from "@/components/ui-kit/Primitives";
+import { PublicNav, PublicFooter } from "@/components/jukbar/PublicNav";
+import { RouteMap } from "@/components/jukbar/RouteMap";
 import {
-  ArrowUpRight, ArrowDownRight, Truck, Package, Wallet, Activity,
-  MoreHorizontal, ArrowRight, MapPin, Clock, Fuel, ChevronRight,
+  ArrowRight, ShieldCheck, MapPin, Bell, Building2, Search,
+  Truck, Package, Route as RouteIcon, Activity, CheckCircle2, Zap,
 } from "lucide-react";
 
 export const Route = createFileRoute("/")({
-  head: () => ({ meta: [{ title: "Dashboard — Logist" }, { name: "description", content: "Logistics operations overview." }] }),
-  component: DashboardPage,
+  head: () => ({
+    meta: [
+      { title: "Jük Bar — The operating system for modern freight" },
+      { name: "description", content: "Smart logistics platform connecting cargo owners, carriers, logisticians and forwarders. Find transport, manage cargo, track routes, verify partners." },
+      { property: "og:title", content: "Jük Bar — Freight OS" },
+      { property: "og:description", content: "Smart logistics platform for cargo movement across Europe and beyond." },
+    ],
+  }),
+  component: LandingPage,
 });
 
-const kpis = [
-  { label: "Active shipments", value: "248", delta: "+12.4%", up: true, icon: Truck, sub: "vs. last 30d" },
-  { label: "Cargo volume", value: "14,820", suffix: "t", delta: "+3.1%", up: true, icon: Package, sub: "this quarter" },
-  { label: "Gross revenue", value: "€ 2.84M", delta: "+18.7%", up: true, icon: Wallet, sub: "MTD" },
-  { label: "On-time rate", value: "96.2", suffix: "%", delta: "-0.6%", up: false, icon: Activity, sub: "rolling 7d" },
+const features = [
+  { icon: Package, h: "Cargo management", p: "Create, dispatch and track every shipment from a single console with full document trail." },
+  { icon: Search, h: "Transport search", p: "Match cargo to verified carriers in seconds across 14 corridors and rising." },
+  { icon: ShieldCheck, h: "Verified carriers", p: "Every partner is KYC-verified with SLA history, insurance and compliance documents." },
+  { icon: RouteIcon, h: "Route tracking", p: "Live GPS, ETAs, border events and proof-of-delivery in real time." },
+  { icon: Bell, h: "Smart notifications", p: "Operational, financial and compliance alerts routed to the right teammate." },
+  { icon: Building2, h: "Company cabinet", p: "A polished digital cabinet for your team, documents, billing and permissions." },
+  { icon: MapPin, h: "Interactive maps", p: "Real maps, real lanes — not screenshots. Plan, dispatch and trace at a glance." },
+  { icon: Activity, h: "Operations console", p: "Throughput, on-time rates and fleet utilisation surfaced where decisions are made." },
 ];
 
-const shipments = [
-  { id: "SHP-2841", route: "Hamburg → Madrid", carrier: "TransEuro Spedition", eta: "Apr 12, 14:20", status: "in_transit" as const, progress: 64 },
-  { id: "SHP-2840", route: "Rotterdam → Milan", carrier: "Aldridge Freight", eta: "Apr 11, 09:00", status: "loading" as const, progress: 12 },
-  { id: "SHP-2837", route: "Gdańsk → Lyon", carrier: "Vostok Logistik", eta: "Apr 13, 22:40", status: "in_transit" as const, progress: 41 },
-  { id: "SHP-2835", route: "Antwerp → Vienna", carrier: "Brennero Cargo", eta: "Apr 10, 16:10", status: "delayed" as const, progress: 78 },
-  { id: "SHP-2832", route: "Riga → Berlin", carrier: "Nordfracht GmbH", eta: "Apr 09, 11:00", status: "delivered" as const, progress: 100 },
+const roles = [
+  { h: "Cargo owners", p: "List freight, compare quotes, lock in verified carriers and watch it move.", t: "Post cargo · Receive bids · Track delivery" },
+  { h: "Carriers", p: "Find loads that match your fleet, lanes and equipment. Get paid faster.", t: "Discover loads · Bid · Get dispatched" },
+  { h: "Logisticians", p: "Coordinate complex multi-leg shipments across modes and borders.", t: "Plan · Allocate · Reconcile" },
+  { h: "Forwarders", p: "Quote, book and operate as a single source of truth for your clients.", t: "Quote · Book · Operate · Invoice" },
 ];
 
-const volumeBars = [42, 58, 51, 64, 70, 49, 73, 81, 68, 92, 84, 95, 88, 110, 102, 121];
-
-function Sparkline() {
+function LandingPage() {
   return (
-    <svg viewBox="0 0 100 30" className="h-8 w-full">
-      <polyline fill="none" stroke="oklch(0.76 0.14 60)" strokeWidth="1.5"
-        points="0,22 8,18 16,20 24,12 32,16 40,8 48,14 56,6 64,11 72,4 80,9 88,3 100,7"/>
-      <polyline fill="oklch(0.76 0.14 60 / 0.12)" stroke="none"
-        points="0,22 8,18 16,20 24,12 32,16 40,8 48,14 56,6 64,11 72,4 80,9 88,3 100,7 100,30 0,30"/>
-    </svg>
-  );
-}
+    <div className="min-h-screen bg-background text-foreground">
+      <PublicNav />
 
-function DashboardPage() {
-  return (
-    <div>
-      <PageHeader
-        eyebrow="Workspace · Operations"
-        title="Good morning, Erik"
-        description="Real-time overview of your freight network. 248 shipments in motion across 14 corridors."
-        actions={
-          <>
-            <Btn variant="outline">Export report</Btn>
-            <Btn variant="primary">Dispatch shipment <ArrowRight className="h-3.5 w-3.5"/></Btn>
-          </>
-        }
-      />
-
-      {/* KPIs */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {kpis.map((k) => {
-          const Icon = k.icon;
-          return (
-            <Card key={k.label} className="p-5">
-              <div className="flex items-start justify-between">
-                <div className="rounded-md bg-surface-2 p-2"><Icon className="h-4 w-4 text-primary"/></div>
-                <span className={`flex items-center gap-1 font-mono text-[11px] ${k.up ? "text-success" : "text-destructive"}`}>
-                  {k.up ? <ArrowUpRight className="h-3 w-3"/> : <ArrowDownRight className="h-3 w-3"/>}
-                  {k.delta}
-                </span>
+      {/* HERO */}
+      <section className="relative overflow-hidden">
+        <div className="radial-emerald absolute inset-0" />
+        <div className="grid-bg absolute inset-0 opacity-50" />
+        <div className="relative mx-auto max-w-7xl px-5 pt-20 pb-24 lg:px-10 lg:pt-28 lg:pb-32">
+          <div className="grid items-center gap-12 lg:grid-cols-12">
+            <div className="lg:col-span-7">
+              <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1">
+                <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary">Now onboarding partners · EU</span>
               </div>
-              <div className="mt-4 flex items-baseline gap-1">
-                <div className="num text-[28px] font-semibold tracking-tight">{k.value}</div>
-                {k.suffix && <div className="text-sm text-muted-foreground">{k.suffix}</div>}
+              <h1 className="mt-6 text-[44px] font-semibold leading-[1.02] tracking-tight md:text-[64px]">
+                The operating system for <span className="text-gradient-emerald">smart freight</span> movement.
+              </h1>
+              <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-muted-foreground md:text-base">
+                Jük Bar connects cargo owners, carriers, logisticians and forwarders inside one
+                premium workspace. Find transport, manage cargo, track routes and verify
+                companies — without the spreadsheets.
+              </p>
+              <div className="mt-9 flex flex-wrap items-center gap-3">
+                <Link
+                  to="/register"
+                  className="group inline-flex h-12 items-center gap-2 rounded-md bg-primary px-5 text-[14px] font-medium text-primary-foreground hover:bg-primary/90"
+                >
+                  Get started
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                </Link>
+                <Link
+                  to="/login"
+                  className="inline-flex h-12 items-center gap-2 rounded-md border border-border bg-surface/60 px-5 text-[14px] font-medium hover:bg-surface-2"
+                >
+                  Login
+                </Link>
               </div>
-              <div className="mt-1 text-xs text-muted-foreground">{k.label} · <span className="font-mono">{k.sub}</span></div>
-              <div className="mt-3"><Sparkline/></div>
-            </Card>
-          );
-        })}
-      </div>
-
-      {/* Map + Volume */}
-      <div className="mt-5 grid grid-cols-1 gap-4 xl:grid-cols-3">
-        <Card className="xl:col-span-2 overflow-hidden">
-          <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
-            <div>
-              <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Live network</div>
-              <div className="text-[15px] font-semibold">Fleet map · 248 vehicles</div>
-            </div>
-            <div className="flex gap-1">
-              {["EU","NA","ASIA"].map((r,i) => (
-                <button key={r} className={`rounded-md border px-2.5 py-1 font-mono text-[11px] ${i===0 ? "border-primary/40 bg-primary/10 text-primary" : "border-border bg-surface-2 text-muted-foreground"}`}>{r}</button>
-              ))}
-            </div>
-          </div>
-          <MapPreview className="h-[320px] rounded-none border-0 border-t border-border" />
-          <div className="grid grid-cols-3 divide-x divide-border border-t border-border">
-            {[
-              { l: "Avg speed", v: "78", s: "km/h" },
-              { l: "Idle fleet", v: "12", s: "vehicles" },
-              { l: "Fuel index", v: "1.62", s: "€/L" },
-            ].map(s => (
-              <div key={s.l} className="px-5 py-3.5">
-                <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{s.l}</div>
-                <div className="mt-0.5 flex items-baseline gap-1"><span className="num text-lg font-semibold">{s.v}</span><span className="text-xs text-muted-foreground">{s.s}</span></div>
-              </div>
-            ))}
-          </div>
-        </Card>
-
-        <Card className="p-5">
-          <div className="flex items-start justify-between">
-            <div>
-              <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Last 16 weeks</div>
-              <div className="text-[15px] font-semibold">Cargo throughput</div>
-            </div>
-            <button className="text-muted-foreground"><MoreHorizontal className="h-4 w-4"/></button>
-          </div>
-          <div className="mt-5 flex h-[180px] items-end gap-1.5">
-            {volumeBars.map((h, i) => (
-              <div key={i} className="group relative flex-1">
-                <div className="w-full rounded-sm bg-gradient-to-t from-primary/30 to-primary transition-all group-hover:from-primary/50 group-hover:to-primary" style={{ height: `${h}%` }}/>
-              </div>
-            ))}
-          </div>
-          <div className="mt-3 flex justify-between font-mono text-[10px] text-muted-foreground">
-            <span>W01</span><span>W08</span><span>W16</span>
-          </div>
-          <div className="mt-5 grid grid-cols-2 gap-3 border-t border-border pt-4">
-            <div>
-              <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Inbound</div>
-              <div className="num mt-0.5 text-base font-semibold">8,240 t</div>
-            </div>
-            <div>
-              <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Outbound</div>
-              <div className="num mt-0.5 text-base font-semibold">6,580 t</div>
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      {/* Recent shipments + side */}
-      <div className="mt-5 grid grid-cols-1 gap-4 xl:grid-cols-3">
-        <Card className="xl:col-span-2">
-          <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
-            <div>
-              <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Operations queue</div>
-              <div className="text-[15px] font-semibold">Recent shipments</div>
-            </div>
-            <Link to="/active-cargos" className="flex items-center gap-1 text-[12px] text-primary hover:underline">View all <ChevronRight className="h-3.5 w-3.5"/></Link>
-          </div>
-          <div className="divide-y divide-border">
-            {shipments.map(s => (
-              <Link key={s.id} to="/cargo-details" className="flex items-center gap-4 px-5 py-3.5 transition-colors hover:bg-surface-2/50">
-                <div className="font-mono text-[11px] text-muted-foreground w-20">{s.id}</div>
-                <div className="min-w-0 flex-1">
-                  <div className="truncate text-[13px] font-medium">{s.route}</div>
-                  <div className="truncate text-[11px] text-muted-foreground">{s.carrier}</div>
-                </div>
-                <div className="hidden md:flex w-32 items-center gap-2">
-                  <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface-3">
-                    <div className="h-full rounded-full bg-primary" style={{ width: `${s.progress}%` }}/>
+              <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-3">
+                {["KYC verified network", "SLA tracking", "Multi-modal lanes"].map((x) => (
+                  <div key={x} className="flex items-center gap-2 text-[12px] text-muted-foreground">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-primary" /> {x}
                   </div>
-                  <span className="num font-mono text-[10px] text-muted-foreground w-8 text-right">{s.progress}%</span>
-                </div>
-                <div className="hidden sm:block">
-                  <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">ETA</div>
-                  <div className="text-[12px]">{s.eta}</div>
-                </div>
-                <StatusBadge status={s.status}/>
-              </Link>
-            ))}
-          </div>
-        </Card>
-
-        <div className="space-y-4">
-          <Card className="p-5">
-            <div className="flex items-center justify-between">
-              <div className="text-[15px] font-semibold">Today's dispatch</div>
-              <span className="font-mono text-[10px] text-muted-foreground">Apr 09</span>
+                ))}
+              </div>
             </div>
-            <div className="mt-4 space-y-3">
-              {[
-                { t: "07:40", e: "Loading complete · SHP-2840", c: "bg-warning" },
-                { t: "09:12", e: "Border crossing AT/IT", c: "bg-info" },
-                { t: "11:08", e: "Delivery confirmed · Berlin", c: "bg-success" },
-                { t: "13:30", e: "Driver rest stop — A2 km 412", c: "bg-muted-foreground" },
-              ].map((e, i) => (
-                <div key={i} className="flex gap-3">
-                  <div className="font-mono text-[11px] text-muted-foreground w-10">{e.t}</div>
-                  <div className="relative pt-1.5">
-                    <div className={`h-2 w-2 rounded-full ${e.c}`}/>
-                    {i !== 3 && <div className="absolute left-1/2 top-3 h-6 w-px -translate-x-1/2 bg-border"/>}
-                  </div>
-                  <div className="flex-1 text-[13px]">{e.e}</div>
-                </div>
-              ))}
-            </div>
-          </Card>
 
-          <Card className="p-5">
-            <div className="text-[15px] font-semibold">Top corridors</div>
-            <div className="mt-4 space-y-3">
-              {[
-                { r: "DE → ES", v: 92, n: "42 active" },
-                { r: "NL → IT", v: 68, n: "31 active" },
-                { r: "PL → FR", v: 54, n: "24 active" },
-                { r: "LV → DE", v: 38, n: "18 active" },
-              ].map(c => (
-                <div key={c.r}>
-                  <div className="flex justify-between text-[12px]">
-                    <span className="font-medium">{c.r}</span>
-                    <span className="font-mono text-muted-foreground">{c.n}</span>
+            {/* Hero card with live map */}
+            <div className="lg:col-span-5">
+              <div className="emerald-glow rounded-2xl border border-border bg-card p-2">
+                <div className="rounded-xl border border-border bg-background/60 p-3">
+                  <div className="flex items-center justify-between px-1.5 pb-2">
+                    <div>
+                      <div className="font-mono text-[10px] uppercase tracking-wider text-primary">Live lane · DE → ES</div>
+                      <div className="text-[13px] font-medium">SHP-2841 · Hamburg → Madrid</div>
+                    </div>
+                    <span className="inline-flex items-center gap-1.5 rounded-md border border-primary/30 bg-primary/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-primary">
+                      <span className="h-1.5 w-1.5 rounded-full bg-primary" /> In transit
+                    </span>
                   </div>
-                  <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-surface-3">
-                    <div className="h-full bg-primary" style={{ width: `${c.v}%` }}/>
+                  <RouteMap height={300} />
+                  <div className="mt-3 grid grid-cols-3 divide-x divide-border rounded-md border border-border bg-surface/50">
+                    {[
+                      { l: "Distance", v: "2,481", s: "km" },
+                      { l: "ETA", v: "Apr 12", s: "14:20" },
+                      { l: "Carrier", v: "TransEuro", s: "★ 4.92" },
+                    ].map((s) => (
+                      <div key={s.l} className="p-3">
+                        <div className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">{s.l}</div>
+                        <div className="mt-0.5 flex items-baseline gap-1">
+                          <span className="num text-sm font-semibold">{s.v}</span>
+                          <span className="text-[11px] text-muted-foreground">{s.s}</span>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              ))}
+              </div>
             </div>
-          </Card>
+          </div>
         </div>
-      </div>
+      </section>
+
+      {/* Logos / stats strip */}
+      <section className="border-y border-border/60 bg-surface/40">
+        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-px bg-border md:grid-cols-4 lg:px-0">
+          {[
+            { v: "14,820 t", l: "Cargo moved this quarter" },
+            { v: "248", l: "Active shipments" },
+            { v: "96.2%", l: "On-time delivery" },
+            { v: "1,400+", l: "Verified carriers" },
+          ].map((s) => (
+            <div key={s.l} className="bg-background px-6 py-7">
+              <div className="num text-2xl font-semibold tracking-tight">{s.v}</div>
+              <div className="mt-1 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{s.l}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* FEATURES */}
+      <section id="platform" className="mx-auto max-w-7xl px-5 py-24 lg:px-10">
+        <div className="max-w-2xl">
+          <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary">Platform · Freight OS</div>
+          <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
+            Everything freight teams run on, in one console.
+          </h2>
+          <p className="mt-3 text-[15px] text-muted-foreground">
+            Replace the patchwork of spreadsheets, email threads and trackers with a single,
+            operationally serious platform.
+          </p>
+        </div>
+        <div className="mt-12 grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">
+          {features.map((f) => {
+            const Icon = f.icon;
+            return (
+              <div key={f.h} className="group bg-card p-6 transition-colors hover:bg-surface-2">
+                <div className="flex h-10 w-10 items-center justify-center rounded-md border border-primary/20 bg-primary/10">
+                  <Icon className="h-4.5 w-4.5 text-primary" />
+                </div>
+                <h3 className="mt-5 text-[15px] font-semibold">{f.h}</h3>
+                <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">{f.p}</p>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* ROLES */}
+      <section id="roles" className="border-t border-border/60 bg-surface/30">
+        <div className="mx-auto max-w-7xl px-5 py-24 lg:px-10">
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div className="max-w-2xl">
+              <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary">Roles</div>
+              <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
+                Built for every side of the lane.
+              </h2>
+            </div>
+            <p className="max-w-md text-[14px] text-muted-foreground">
+              Hybrid roles supported — Carrier-Forwarder, Cargo owner-Carrier, Logistician-Carrier.
+              One identity, one cabinet.
+            </p>
+          </div>
+          <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+            {roles.map((r, i) => (
+              <div key={r.h} className="group relative overflow-hidden rounded-xl border border-border bg-card p-6 transition-all hover:border-primary/40">
+                <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">0{i + 1}</div>
+                <h3 className="mt-3 text-lg font-semibold">{r.h}</h3>
+                <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground">{r.p}</p>
+                <div className="mt-6 border-t border-border pt-4 font-mono text-[10px] uppercase tracking-wider text-primary">
+                  {r.t}
+                </div>
+                <div className="pointer-events-none absolute inset-x-0 -bottom-px h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* OPERATIONS SHOWCASE */}
+      <section id="operations" className="mx-auto max-w-7xl px-5 py-24 lg:px-10">
+        <div className="grid items-center gap-12 lg:grid-cols-2">
+          <div>
+            <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary">Operations</div>
+            <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
+              Move cargo with the rigour of a Tier-1 forwarder.
+            </h2>
+            <p className="mt-4 text-[15px] text-muted-foreground">
+              Jük Bar is engineered for operations teams running real lanes. Every shipment has a
+              live state machine, every carrier has a verified record, every event has a timestamp.
+            </p>
+            <ul className="mt-6 space-y-3.5">
+              {[
+                { h: "Multi-leg routing", p: "Stitch road, rail and short-sea into one trackable shipment." },
+                { h: "Document vault", p: "CMR, e-CMR, customs and proof-of-delivery stored against each load." },
+                { h: "Compliance & KYC", p: "Insurance, VAT, ADR and W&I status surfaced before you book." },
+                { h: "Settlement", p: "Quote → confirm → invoice — without leaving the cabinet." },
+              ].map((x) => (
+                <li key={x.h} className="flex gap-3">
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                  <div>
+                    <div className="text-[14px] font-medium">{x.h}</div>
+                    <div className="text-[13px] text-muted-foreground">{x.p}</div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="emerald-glow rounded-2xl border border-border bg-card p-2">
+            <RouteMap
+              height={420}
+              pickup={{ lat: 52.3676, lng: 4.9041, label: "Amsterdam, NL" }}
+              dropoff={{ lat: 45.4642, lng: 9.19, label: "Milan, IT" }}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section id="pricing" className="border-t border-border/60">
+        <div className="mx-auto max-w-5xl px-5 py-24 text-center lg:px-10">
+          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1">
+            <Zap className="h-3 w-3 text-primary" />
+            <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary">Free during early access</span>
+          </div>
+          <h2 className="mt-6 text-3xl font-semibold tracking-tight md:text-5xl">
+            Start moving freight with Jük Bar today.
+          </h2>
+          <p className="mt-4 text-[15px] text-muted-foreground">
+            Onboard your company in under five minutes. Verification typically completes within 24h.
+          </p>
+          <div className="mt-9 flex flex-wrap justify-center gap-3">
+            <Link to="/register" className="inline-flex h-12 items-center gap-2 rounded-md bg-primary px-6 text-[14px] font-medium text-primary-foreground hover:bg-primary/90">
+              Create company account <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link to="/login" className="inline-flex h-12 items-center gap-2 rounded-md border border-border bg-surface/60 px-6 text-[14px] font-medium hover:bg-surface-2">
+              I already have an account
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <PublicFooter />
     </div>
   );
 }

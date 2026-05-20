@@ -10,11 +10,16 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WorkspaceRouteImport } from './routes/workspace'
+import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as NotificationsRouteImport } from './routes/notifications'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as FindTransportRouteImport } from './routes/find-transport'
 import { Route as CarriersRouteImport } from './routes/carriers'
 import { Route as CargoDetailsRouteImport } from './routes/cargo-details'
+import { Route as CabinetRouteImport } from './routes/cabinet'
 import { Route as ActiveCargosRouteImport } from './routes/active-cargos'
 import { Route as IndexRouteImport } from './routes/index'
 
@@ -23,14 +28,34 @@ const WorkspaceRoute = WorkspaceRouteImport.update({
   path: '/workspace',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const NotificationsRoute = NotificationsRouteImport.update({
   id: '/notifications',
   path: '/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FindTransportRoute = FindTransportRouteImport.update({
@@ -48,6 +73,11 @@ const CargoDetailsRoute = CargoDetailsRouteImport.update({
   path: '/cargo-details',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CabinetRoute = CabinetRouteImport.update({
+  id: '/cabinet',
+  path: '/cabinet',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ActiveCargosRoute = ActiveCargosRouteImport.update({
   id: '/active-cargos',
   path: '/active-cargos',
@@ -62,32 +92,47 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/active-cargos': typeof ActiveCargosRoute
+  '/cabinet': typeof CabinetRoute
   '/cargo-details': typeof CargoDetailsRoute
   '/carriers': typeof CarriersRoute
   '/find-transport': typeof FindTransportRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/login': typeof LoginRoute
   '/notifications': typeof NotificationsRoute
+  '/onboarding': typeof OnboardingRoute
   '/profile': typeof ProfileRoute
+  '/register': typeof RegisterRoute
   '/workspace': typeof WorkspaceRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/active-cargos': typeof ActiveCargosRoute
+  '/cabinet': typeof CabinetRoute
   '/cargo-details': typeof CargoDetailsRoute
   '/carriers': typeof CarriersRoute
   '/find-transport': typeof FindTransportRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/login': typeof LoginRoute
   '/notifications': typeof NotificationsRoute
+  '/onboarding': typeof OnboardingRoute
   '/profile': typeof ProfileRoute
+  '/register': typeof RegisterRoute
   '/workspace': typeof WorkspaceRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/active-cargos': typeof ActiveCargosRoute
+  '/cabinet': typeof CabinetRoute
   '/cargo-details': typeof CargoDetailsRoute
   '/carriers': typeof CarriersRoute
   '/find-transport': typeof FindTransportRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/login': typeof LoginRoute
   '/notifications': typeof NotificationsRoute
+  '/onboarding': typeof OnboardingRoute
   '/profile': typeof ProfileRoute
+  '/register': typeof RegisterRoute
   '/workspace': typeof WorkspaceRoute
 }
 export interface FileRouteTypes {
@@ -95,42 +140,62 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/active-cargos'
+    | '/cabinet'
     | '/cargo-details'
     | '/carriers'
     | '/find-transport'
+    | '/forgot-password'
+    | '/login'
     | '/notifications'
+    | '/onboarding'
     | '/profile'
+    | '/register'
     | '/workspace'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/active-cargos'
+    | '/cabinet'
     | '/cargo-details'
     | '/carriers'
     | '/find-transport'
+    | '/forgot-password'
+    | '/login'
     | '/notifications'
+    | '/onboarding'
     | '/profile'
+    | '/register'
     | '/workspace'
   id:
     | '__root__'
     | '/'
     | '/active-cargos'
+    | '/cabinet'
     | '/cargo-details'
     | '/carriers'
     | '/find-transport'
+    | '/forgot-password'
+    | '/login'
     | '/notifications'
+    | '/onboarding'
     | '/profile'
+    | '/register'
     | '/workspace'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ActiveCargosRoute: typeof ActiveCargosRoute
+  CabinetRoute: typeof CabinetRoute
   CargoDetailsRoute: typeof CargoDetailsRoute
   CarriersRoute: typeof CarriersRoute
   FindTransportRoute: typeof FindTransportRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
+  LoginRoute: typeof LoginRoute
   NotificationsRoute: typeof NotificationsRoute
+  OnboardingRoute: typeof OnboardingRoute
   ProfileRoute: typeof ProfileRoute
+  RegisterRoute: typeof RegisterRoute
   WorkspaceRoute: typeof WorkspaceRoute
 }
 
@@ -143,6 +208,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WorkspaceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profile': {
       id: '/profile'
       path: '/profile'
@@ -150,11 +222,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/notifications': {
       id: '/notifications'
       path: '/notifications'
       fullPath: '/notifications'
       preLoaderRoute: typeof NotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/find-transport': {
@@ -178,6 +271,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CargoDetailsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/cabinet': {
+      id: '/cabinet'
+      path: '/cabinet'
+      fullPath: '/cabinet'
+      preLoaderRoute: typeof CabinetRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/active-cargos': {
       id: '/active-cargos'
       path: '/active-cargos'
@@ -198,11 +298,16 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ActiveCargosRoute: ActiveCargosRoute,
+  CabinetRoute: CabinetRoute,
   CargoDetailsRoute: CargoDetailsRoute,
   CarriersRoute: CarriersRoute,
   FindTransportRoute: FindTransportRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
+  LoginRoute: LoginRoute,
   NotificationsRoute: NotificationsRoute,
+  OnboardingRoute: OnboardingRoute,
   ProfileRoute: ProfileRoute,
+  RegisterRoute: RegisterRoute,
   WorkspaceRoute: WorkspaceRoute,
 }
 export const routeTree = rootRouteImport
