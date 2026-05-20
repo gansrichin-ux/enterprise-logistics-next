@@ -1,11 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { JukBarLogo } from "@/components/jukbar/Logo";
-import { signInWithEmail, signInWithGoogle } from "@/lib/firebase/auth";
+import { getAuthErrorMessage, signInWithEmail, signInWithGoogle } from "@/lib/firebase/auth";
 import { Loader2, ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/login")({
-  head: () => ({ meta: [{ title: "Login — Jük Bar" }] }),
+  head: () => ({ meta: [{ title: "Вход — Jük Bar" }] }),
   component: LoginPage,
 });
 
@@ -18,59 +18,80 @@ function LoginPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true); setError(null);
+    setLoading(true);
+    setError(null);
     try {
       await signInWithEmail(email, password);
       navigate({ to: "/cabinet" });
     } catch (error) {
-      setError(error instanceof Error ? error.message : String(error));
+      setError(getAuthErrorMessage(error));
     } finally {
       setLoading(false);
     }
   }
 
   async function handleGoogle() {
-    setLoading(true); setError(null);
+    setLoading(true);
+    setError(null);
     try {
       const result = await signInWithGoogle();
-      navigate({ to: "/cabinet" });
-      if (result.needsOnboarding) {
-        return;
-      }
+      navigate({ to: result.needsOnboarding ? "/complete-profile" : "/cabinet" });
     } catch (error) {
-      setError(error instanceof Error ? error.message : String(error));
+      setError(getAuthErrorMessage(error));
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <AuthShell title="Welcome back" subtitle="Sign in to your Jük Bar cabinet.">
+    <AuthShell title="Вход в Jük Bar" subtitle="Войдите в кабинет компании через Firebase Auth.">
       <form onSubmit={handleSubmit} className="space-y-3.5">
-        <Field label="Work email">
-          <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
-            className="auth-input" placeholder="dispatch@yourcompany.eu" />
+        <Field label="Email">
+          <input
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="auth-input"
+            placeholder="name@company.kz"
+          />
         </Field>
-        <Field label="Password" right={<Link to="/forgot-password" className="text-[11px] text-primary hover:underline">Forgot?</Link>}>
-          <input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)}
-            className="auth-input" placeholder="••••••••" />
+        <Field
+          label="Пароль"
+          right={<Link to="/forgot-password" className="text-[11px] text-primary hover:underline">Забыли?</Link>}
+        >
+          <input
+            type="password"
+            required
+            minLength={6}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="auth-input"
+            placeholder="••••••••"
+          />
         </Field>
         {error && <p className="text-[12px] text-destructive">{error}</p>}
-        <button type="submit" disabled={loading}
-          className="mt-2 inline-flex h-11 w-full items-center justify-center gap-2 rounded-md bg-primary text-[14px] font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-60">
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Sign in <ArrowRight className="h-4 w-4" /></>}
+        <button
+          type="submit"
+          disabled={loading}
+          className="mt-2 inline-flex h-11 w-full items-center justify-center gap-2 rounded-md bg-primary text-[14px] font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
+        >
+          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Войти <ArrowRight className="h-4 w-4" /></>}
         </button>
       </form>
 
       <Divider />
 
-      <button onClick={handleGoogle} disabled={loading}
-        className="inline-flex h-11 w-full items-center justify-center gap-2.5 rounded-md border border-border bg-surface/60 text-[14px] font-medium hover:bg-surface-2 disabled:opacity-60">
-        <GoogleIcon /> Continue with Google
+      <button
+        onClick={handleGoogle}
+        disabled={loading}
+        className="inline-flex h-11 w-full items-center justify-center gap-2.5 rounded-md border border-border bg-surface/60 text-[14px] font-medium hover:bg-surface-2 disabled:opacity-60"
+      >
+        <GoogleIcon /> Войти через Google
       </button>
 
       <p className="mt-7 text-center text-[13px] text-muted-foreground">
-        New to Jük Bar? <Link to="/register" className="text-primary hover:underline">Create an account</Link>
+        Нет аккаунта? <Link to="/register" className="text-primary hover:underline">Зарегистрироваться</Link>
       </p>
     </AuthShell>
   );
@@ -125,7 +146,7 @@ export function Divider() {
   return (
     <div className="my-5 flex items-center gap-3">
       <div className="h-px flex-1 bg-border" />
-      <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">or</span>
+      <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">или</span>
       <div className="h-px flex-1 bg-border" />
     </div>
   );

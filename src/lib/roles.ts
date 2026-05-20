@@ -18,14 +18,14 @@ const legacyRoleMap: Record<string, AppRole> = {
 };
 
 const roleLabels: Record<AppRole, string> = {
-  logistician: "Logistician",
-  carrier: "Carrier",
-  cargo_owner: "Cargo owner",
-  forwarder: "Forwarder",
-  lawyer: "Lawyer",
-  carrier_forwarder: "Carrier-Forwarder",
-  cargo_owner_carrier: "Cargo owner-Carrier",
-  logistician_carrier: "Logistician-Carrier",
+  logistician: "Логист",
+  carrier: "Перевозчик",
+  cargo_owner: "Грузовладелец",
+  forwarder: "Экспедитор",
+  lawyer: "Юрист",
+  carrier_forwarder: "Перевозчик-Экспедитор",
+  cargo_owner_carrier: "Грузовладелец-Перевозчик",
+  logistician_carrier: "Логист-Перевозчик",
 };
 
 const roleDashboardPaths: Record<AppRole, string> = {
@@ -82,4 +82,3 @@ export function isHybridRole(role: string | null | undefined) {
     normalizeRole(role),
   );
 }
-

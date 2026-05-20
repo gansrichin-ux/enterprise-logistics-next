@@ -33,6 +33,8 @@ type RegisterWithEmailInput = {
 type UserDocumentOptions = {
   profileStatus?: string;
   onboardingStep?: number;
+  onboardingCompleted?: boolean;
+  profileCompletenessPercent?: number;
 };
 
 export type GoogleSignInResult = {
@@ -61,6 +63,12 @@ export type UserProfileDocument = {
   updatedAt: unknown;
 };
 
+type CompleteProfileInput = {
+  fullName: string;
+  username: string;
+  role: string;
+};
+
 function getFirebaseAuth(): Auth {
   return getAuth(getFirebaseApp());
 }
@@ -77,16 +85,6 @@ function usernameLower(username: string) {
   return normalizeUsername(username).toLocaleLowerCase("en-US");
 }
 
-function fallbackUsername(user: User) {
-  const source = user.displayName || user.email?.split("@")[0] || "user";
-  const base = source
-    .trim()
-    .toLocaleLowerCase("en-US")
-    .replace(/[^a-z0-9_]+/g, "_")
-    .replace(/^_+|_+$/g, "");
-  return `${base || "user"}_${user.uid.slice(0, 6)}`;
-}
-
 function buildUserDocument({
   user,
   fullName,
@@ -94,6 +92,8 @@ function buildUserDocument({
   role,
   profileStatus = "pending",
   onboardingStep = 0,
+  onboardingCompleted = false,
+  profileCompletenessPercent = 10,
 }: {
   user: User;
   fullName: string;
@@ -116,10 +116,10 @@ function buildUserDocument({
     ratingSum: 0,
     emailCodeVerified: false,
     emailVerificationSkipped: false,
-    onboardingCompleted: false,
+    onboardingCompleted,
     onboardingStep,
     profileStatus,
-    profileCompletenessPercent: 10,
+    profileCompletenessPercent,
     createdAt: now,
     updatedAt: now,
   };
@@ -174,17 +174,6 @@ async function ensureGoogleUserDocument(user: User): Promise<boolean> {
     return data?.profileStatus === "needs_role" || !data?.role;
   }
 
-  const username = fallbackUsername(user);
-  await createUserProfileWithUsername({
-    user,
-    fullName: user.displayName ?? username,
-    username,
-    role: "logistician",
-    options: {
-      profileStatus: "needs_role",
-      onboardingStep: 1,
-    },
-  });
   return true;
 }
 
@@ -232,6 +221,87 @@ export async function registerWithEmail({
   return credential.user;
 }
 
+export async function completeProfileWithRole({
+  fullName,
+  username,
+  role,
+}: CompleteProfileInput) {
+  const auth = getFirebaseAuth();
+  const user = auth.currentUser;
+
+  if (!user) {
+    throw new Error("Сначала войдите в аккаунт.");
+  }
+
+  const db = getDb();
+  const cleanUsername = normalizeUsername(username);
+  const key = usernameLower(cleanUsername);
+  const normalizedRole = normalizeRole(role);
+  const userRef = doc(db, "users", user.uid);
+  const usernameRef = doc(db, "usernames", key);
+
+  await runTransaction(db, async (transaction) => {
+    const existingUser = await transaction.get(userRef);
+
+    if (!existingUser.exists()) {
+      const existingUsername = await transaction.get(usernameRef);
+      if (existingUsername.exists()) {
+        throw new Error("Username is already taken.");
+      }
+
+      transaction.set(usernameRef, { uid: user.uid });
+      transaction.set(
+        userRef,
+        buildUserDocument({
+          user,
+          fullName,
+          username: cleanUsername,
+          role: normalizedRole,
+          profileStatus: "pending",
+          onboardingStep: 1,
+          onboardingCompleted: true,
+          profileCompletenessPercent: 20,
+        }),
+      );
+      return;
+    }
+
+    const data = existingUser.data();
+    const existingRole = data?.role ? normalizeRole(data.role as string) : null;
+    const existingUsernameLower = typeof data?.usernameLower === "string" ? data.usernameLower : "";
+
+    if (!existingRole) {
+      throw new Error("Existing profile has no role and cannot be completed without a Firestore rules migration.");
+    }
+    if (existingRole !== normalizedRole) {
+      throw new Error("Role change for an existing profile requires a Firestore rules migration.");
+    }
+    if (existingUsernameLower && existingUsernameLower !== key) {
+      throw new Error("Username change for an existing profile requires username reservation cleanup.");
+    }
+    if (!existingUsernameLower) {
+      const existingUsername = await transaction.get(usernameRef);
+      if (existingUsername.exists()) {
+        throw new Error("Username is already taken.");
+      }
+      transaction.set(usernameRef, { uid: user.uid });
+    }
+
+    transaction.update(userRef, {
+      username: cleanUsername,
+      usernameLower: key,
+      name: fullName.trim() || user.displayName || cleanUsername,
+      onboardingCompleted: true,
+      onboardingStep: 1,
+      profileCompletenessPercent: Math.max(
+        typeof data?.profileCompletenessPercent === "number" ? data.profileCompletenessPercent : 0,
+        20,
+      ),
+      updatedAt: serverTimestamp(),
+    });
+  });
+}
+
 export async function signInWithGoogle(): Promise<GoogleSignInResult> {
   const provider = new GoogleAuthProvider();
   const credential = await signInWithPopup(getFirebaseAuth(), provider);
@@ -264,4 +334,46 @@ export async function sendPasswordResetLink(email: string, redirectUrl?: string)
     email,
     redirectUrl ? { url: redirectUrl } : undefined,
   );
+}
+
+export function getAuthErrorMessage(error: unknown) {
+  const code =
+    typeof error === "object" && error && "code" in error
+      ? String((error as { code?: unknown }).code)
+      : "";
+  const message = error instanceof Error ? error.message : String(error);
+
+  if (message.includes("Username is already taken")) {
+    return "Этот username уже занят. Выберите другой.";
+  }
+
+  switch (code) {
+    case "auth/invalid-credential":
+    case "auth/wrong-password":
+    case "auth/user-not-found":
+      return "Неверный email или пароль.";
+    case "auth/email-already-in-use":
+      return "Аккаунт с таким email уже существует.";
+    case "auth/weak-password":
+      return "Пароль слишком простой. Используйте минимум 8 символов.";
+    case "auth/invalid-email":
+      return "Введите корректный email.";
+    case "auth/popup-blocked":
+      return "Браузер заблокировал окно Google. Разрешите всплывающие окна и попробуйте снова.";
+    case "auth/popup-closed-by-user":
+      return "Вход через Google был отменен.";
+    case "auth/unauthorized-domain":
+      return "Этот домен не разрешен в Firebase Auth.";
+    default:
+      if (message.includes("Firebase is not configured")) {
+        return "Firebase не настроен. Проверьте локальный .env.";
+      }
+      if (message.includes("Firestore rules migration")) {
+        return "Этот профиль нельзя завершить без отдельного плана Firebase rules.";
+      }
+      if (message.includes("username reservation cleanup")) {
+        return "Для смены username нужен отдельный cleanup старой резервации.";
+      }
+      return message || "Не удалось выполнить действие. Попробуйте еще раз.";
+  }
 }

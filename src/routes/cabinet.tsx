@@ -28,7 +28,7 @@ function CabinetPage() {
     company_name: string | null; company_description: string | null;
     city: string | null; region: string | null; country: string | null;
     primary_role: string | null; verification_status: string;
-    completion_percent: number; profile_status: string;
+    completion_percent: number; profile_status: string; onboarding_completed: boolean;
   } | null>(null);
 
   useEffect(() => {
@@ -55,6 +55,7 @@ function CabinetPage() {
           verification_status: (data?.profileStatus as string | undefined) ?? "pending",
           completion_percent: (data?.profileCompletenessPercent as number | undefined) ?? 10,
           profile_status: (data?.profileStatus as string | undefined) ?? "pending",
+          onboarding_completed: Boolean(data?.onboardingCompleted),
         });
       } finally {
         setLoading(false);
@@ -74,23 +75,28 @@ function CabinetPage() {
     return (
       <div className="grid min-h-screen place-items-center bg-background px-4 text-center">
         <div>
-          <p className="text-[14px] text-muted-foreground">No profile found.</p>
-          <Link to="/register" className="mt-3 inline-flex rounded-md bg-primary px-4 py-2 text-[13px] font-medium text-primary-foreground">Complete registration</Link>
+          <p className="text-[14px] text-muted-foreground">Профиль пользователя не найден.</p>
+          <Link to="/complete-profile" className="mt-3 inline-flex rounded-md bg-primary px-4 py-2 text-[13px] font-medium text-primary-foreground">Завершить профиль</Link>
         </div>
       </div>
     );
   }
-  if (profile.profile_status === "needs_role" || !profile.primary_role) {
+  if (!profile.primary_role || (profile.profile_status === "needs_role" && !profile.onboarding_completed)) {
     return (
       <div className="grid min-h-screen place-items-center bg-background px-4 text-center">
         <div className="max-w-md">
-          <p className="text-[15px] font-medium">Complete role setup</p>
+          <p className="text-[15px] font-medium">Завершите выбор роли</p>
           <p className="mt-2 text-[13px] text-muted-foreground">
-            Google sign-in is connected, but role selection for Google accounts will be completed in Stage 2.
+            Google sign-in подключен. Перед открытием кабинета нужно выбрать роль и username.
           </p>
-          <button onClick={handleLogout} className="mt-4 inline-flex rounded-md border border-border bg-surface/60 px-4 py-2 text-[13px] hover:bg-surface-2">
-            Logout
-          </button>
+          <div className="mt-4 flex justify-center gap-2">
+            <Link to="/complete-profile" className="inline-flex rounded-md bg-primary px-4 py-2 text-[13px] font-medium text-primary-foreground hover:bg-primary/90">
+              Завершить профиль
+            </Link>
+            <button onClick={handleLogout} className="inline-flex rounded-md border border-border bg-surface/60 px-4 py-2 text-[13px] hover:bg-surface-2">
+              Logout
+            </button>
+          </div>
         </div>
       </div>
     );

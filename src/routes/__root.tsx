@@ -13,10 +13,10 @@ import { useEffect, useState } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import appCss from "../styles.css?url";
 import { AppShell } from "@/components/layout/AppShell";
-import { observeAuthState, logout } from "@/lib/firebase/auth";
+import { observeAuthState } from "@/lib/firebase/auth";
 import { getDb } from "@/lib/firebase/firestore";
 
-const PUBLIC_PREFIXES = ["/login", "/register", "/forgot-password", "/onboarding", "/cabinet"];
+const PUBLIC_PREFIXES = ["/login", "/register", "/forgot-password", "/complete-profile", "/onboarding", "/cabinet"];
 const LANDING_PATH = "/";
 
 function NotFoundComponent() {
@@ -113,7 +113,12 @@ function ProtectedAppShell({ children }: { children: React.ReactNode }) {
       try {
         const snap = await getDoc(doc(getDb(), "users", user.uid));
         const data = snap.exists() ? snap.data() : null;
-        setBlocked(!data || data.profileStatus === "needs_role" || !data.role);
+        const needsRole = !data || !data.role || (data.profileStatus === "needs_role" && !data.onboardingCompleted);
+        if (needsRole) {
+          navigate({ to: "/complete-profile" });
+          return;
+        }
+        setBlocked(false);
       } finally {
         setChecking(false);
       }
@@ -132,18 +137,17 @@ function ProtectedAppShell({ children }: { children: React.ReactNode }) {
     return (
       <div className="grid min-h-screen place-items-center bg-background px-4 text-center">
         <div className="max-w-md">
-          <p className="text-[15px] font-medium">Complete registration first</p>
+          <p className="text-[15px] font-medium">Завершите профиль</p>
           <p className="mt-2 text-[13px] text-muted-foreground">
-            Your Firebase account is signed in, but its role/profile setup is not ready for the workspace yet.
+            Firebase session активна, но роль или профиль еще не готовы для рабочего пространства.
           </p>
           <button
             onClick={async () => {
-              await logout();
-              navigate({ to: "/login" });
+              navigate({ to: "/complete-profile" });
             }}
             className="mt-4 inline-flex rounded-md border border-border bg-surface/60 px-4 py-2 text-[13px] hover:bg-surface-2"
           >
-            Return to login
+            Завершить профиль
           </button>
         </div>
       </div>

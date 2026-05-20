@@ -17,6 +17,7 @@ import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as FindTransportRouteImport } from './routes/find-transport'
+import { Route as CompleteProfileRouteImport } from './routes/complete-profile'
 import { Route as CarriersRouteImport } from './routes/carriers'
 import { Route as CargoDetailsRouteImport } from './routes/cargo-details'
 import { Route as CabinetRouteImport } from './routes/cabinet'
@@ -63,6 +64,11 @@ const FindTransportRoute = FindTransportRouteImport.update({
   path: '/find-transport',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CompleteProfileRoute = CompleteProfileRouteImport.update({
+  id: '/complete-profile',
+  path: '/complete-profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CarriersRoute = CarriersRouteImport.update({
   id: '/carriers',
   path: '/carriers',
@@ -95,6 +101,7 @@ export interface FileRoutesByFullPath {
   '/cabinet': typeof CabinetRoute
   '/cargo-details': typeof CargoDetailsRoute
   '/carriers': typeof CarriersRoute
+  '/complete-profile': typeof CompleteProfileRoute
   '/find-transport': typeof FindTransportRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
@@ -110,6 +117,7 @@ export interface FileRoutesByTo {
   '/cabinet': typeof CabinetRoute
   '/cargo-details': typeof CargoDetailsRoute
   '/carriers': typeof CarriersRoute
+  '/complete-profile': typeof CompleteProfileRoute
   '/find-transport': typeof FindTransportRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
@@ -126,6 +134,7 @@ export interface FileRoutesById {
   '/cabinet': typeof CabinetRoute
   '/cargo-details': typeof CargoDetailsRoute
   '/carriers': typeof CarriersRoute
+  '/complete-profile': typeof CompleteProfileRoute
   '/find-transport': typeof FindTransportRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
@@ -143,6 +152,7 @@ export interface FileRouteTypes {
     | '/cabinet'
     | '/cargo-details'
     | '/carriers'
+    | '/complete-profile'
     | '/find-transport'
     | '/forgot-password'
     | '/login'
@@ -158,6 +168,7 @@ export interface FileRouteTypes {
     | '/cabinet'
     | '/cargo-details'
     | '/carriers'
+    | '/complete-profile'
     | '/find-transport'
     | '/forgot-password'
     | '/login'
@@ -173,6 +184,7 @@ export interface FileRouteTypes {
     | '/cabinet'
     | '/cargo-details'
     | '/carriers'
+    | '/complete-profile'
     | '/find-transport'
     | '/forgot-password'
     | '/login'
@@ -189,6 +201,7 @@ export interface RootRouteChildren {
   CabinetRoute: typeof CabinetRoute
   CargoDetailsRoute: typeof CargoDetailsRoute
   CarriersRoute: typeof CarriersRoute
+  CompleteProfileRoute: typeof CompleteProfileRoute
   FindTransportRoute: typeof FindTransportRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
@@ -257,6 +270,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FindTransportRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/complete-profile': {
+      id: '/complete-profile'
+      path: '/complete-profile'
+      fullPath: '/complete-profile'
+      preLoaderRoute: typeof CompleteProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/carriers': {
       id: '/carriers'
       path: '/carriers'
@@ -301,6 +321,7 @@ const rootRouteChildren: RootRouteChildren = {
   CabinetRoute: CabinetRoute,
   CargoDetailsRoute: CargoDetailsRoute,
   CarriersRoute: CarriersRoute,
+  CompleteProfileRoute: CompleteProfileRoute,
   FindTransportRoute: FindTransportRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
