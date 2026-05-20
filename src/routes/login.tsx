@@ -32,8 +32,11 @@ function LoginPage() {
   async function handleGoogle() {
     setLoading(true); setError(null);
     try {
-      await signInWithGoogle();
+      const result = await signInWithGoogle();
       navigate({ to: "/cabinet" });
+      if (result.needsOnboarding) {
+        return;
+      }
     } catch (error) {
       setError(error instanceof Error ? error.message : String(error));
     } finally {

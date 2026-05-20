@@ -15,8 +15,8 @@ import {
 import {
   doc,
   getDoc,
+  runTransaction,
   serverTimestamp,
-  setDoc,
 } from "firebase/firestore";
 import { getFirebaseApp, isFirebaseConfigured } from "./client";
 import { getDb } from "./firestore";
@@ -28,6 +28,16 @@ type RegisterWithEmailInput = {
   fullName: string;
   username: string;
   role: string;
+};
+
+type UserDocumentOptions = {
+  profileStatus?: string;
+  onboardingStep?: number;
+};
+
+export type GoogleSignInResult = {
+  user: User;
+  needsOnboarding: boolean;
 };
 
 export type UserProfileDocument = {
@@ -82,12 +92,14 @@ function buildUserDocument({
   fullName,
   username,
   role,
+  profileStatus = "pending",
+  onboardingStep = 0,
 }: {
   user: User;
   fullName: string;
   username: string;
   role: AppRole;
-}): UserProfileDocument {
+} & UserDocumentOptions): UserProfileDocument {
   const now = serverTimestamp();
   const cleanUsername = normalizeUsername(username);
 
@@ -105,68 +117,75 @@ function buildUserDocument({
     emailCodeVerified: false,
     emailVerificationSkipped: false,
     onboardingCompleted: false,
-    onboardingStep: 0,
-    profileStatus: "pending",
+    onboardingStep,
+    profileStatus,
     profileCompletenessPercent: 10,
     createdAt: now,
     updatedAt: now,
   };
 }
 
-async function assertUsernameAvailable(usernameValue: string) {
+async function createUserProfileWithUsername({
+  user,
+  fullName,
+  username,
+  role,
+  options,
+}: {
+  user: User;
+  fullName: string;
+  username: string;
+  role: AppRole;
+  options?: UserDocumentOptions;
+}) {
   const db = getDb();
-  const key = usernameLower(usernameValue);
+  const cleanUsername = normalizeUsername(username);
+  const key = usernameLower(cleanUsername);
+  const userRef = doc(db, "users", user.uid);
+  const usernameRef = doc(db, "usernames", key);
 
-  try {
-    const existing = await getDoc(doc(db, "usernames", key));
+  await runTransaction(db, async (transaction) => {
+    const existing = await transaction.get(usernameRef);
     if (existing.exists()) {
       throw new Error("Username is already taken.");
     }
-  } catch (error) {
-    if (error instanceof Error && error.message === "Username is already taken.") {
-      throw error;
-    }
-    console.warn("[Firebase] Could not verify username availability.", error);
-  }
+
+    transaction.set(
+      userRef,
+      buildUserDocument({
+        user,
+        fullName,
+        username: cleanUsername,
+        role,
+        ...options,
+      }),
+    );
+    transaction.set(usernameRef, { uid: user.uid });
+  });
 }
 
-async function reserveUsername(uid: string, usernameValue: string) {
-  const db = getDb();
-  const cleanUsername = normalizeUsername(usernameValue);
-  const key = usernameLower(cleanUsername);
-
-  try {
-    await setDoc(doc(db, "usernames", key), {
-      uid,
-      username: cleanUsername,
-      usernameLower: key,
-      createdAt: serverTimestamp(),
-    });
-  } catch (error) {
-    console.warn("[Firebase] Could not reserve username.", error);
-  }
-}
-
-async function ensureUserDocument(user: User, fallbackRole: AppRole = "logistician") {
+async function ensureGoogleUserDocument(user: User): Promise<boolean> {
   const db = getDb();
   const userRef = doc(db, "users", user.uid);
   const existing = await getDoc(userRef);
 
   if (existing.exists()) {
-    return;
+    const data = existing.data();
+    return data?.profileStatus === "needs_role" || !data?.role;
   }
 
   const username = fallbackUsername(user);
-  await setDoc(
-    userRef,
-    buildUserDocument({
-      user,
-      fullName: user.displayName ?? username,
-      username,
-      role: fallbackRole,
-    }),
-  );
-  await reserveUsername(user.uid, username);
+  await createUserProfileWithUsername({
+    user,
+    fullName: user.displayName ?? username,
+    username,
+    role: "logistician",
+    options: {
+      profileStatus: "needs_role",
+      onboardingStep: 1,
+    },
+  });
+  return true;
 }
 
 export async function signInWithEmail(email: string, password: string) {
@@ -187,7 +206,6 @@ export async function registerWithEmail({
 }: RegisterWithEmailInput) {
   const cleanUsername = normalizeUsername(username);
   const normalizedRole = normalizeRole(role);
-  await assertUsernameAvailable(cleanUsername);
 
   const credential = await createUserWithEmailAndPassword(
     getFirebaseAuth(),
@@ -196,17 +214,12 @@ export async function registerWithEmail({
   );
 
   try {
-    const db = getDb();
-    await setDoc(
-      doc(db, "users", credential.user.uid),
-      buildUserDocument({
-        user: credential.user,
-        fullName,
-        username: cleanUsername,
-        role: normalizedRole,
-      }),
-    );
-    await reserveUsername(credential.user.uid, cleanUsername);
+    await createUserProfileWithUsername({
+      user: credential.user,
+      fullName,
+      username: cleanUsername,
+      role: normalizedRole,
+    });
   } catch (error) {
     try {
       await deleteUser(credential.user);
@@ -219,11 +232,11 @@ export async function registerWithEmail({
   return credential.user;
 }
 
-export async function signInWithGoogle() {
+export async function signInWithGoogle(): Promise<GoogleSignInResult> {
   const provider = new GoogleAuthProvider();
   const credential = await signInWithPopup(getFirebaseAuth(), provider);
-  await ensureUserDocument(credential.user);
-  return credential.user;
+  const needsOnboarding = await ensureGoogleUserDocument(credential.user);
+  return { user: credential.user, needsOnboarding };
 }
 
 export async function logout() {

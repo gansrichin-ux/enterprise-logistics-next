@@ -10,9 +10,11 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { doc, getDoc } from "firebase/firestore";
 import appCss from "../styles.css?url";
 import { AppShell } from "@/components/layout/AppShell";
-import { observeAuthState } from "@/lib/firebase/auth";
+import { observeAuthState, logout } from "@/lib/firebase/auth";
+import { getDb } from "@/lib/firebase/firestore";
 
 const PUBLIC_PREFIXES = ["/login", "/register", "/forgot-password", "/onboarding", "/cabinet"];
 const LANDING_PATH = "/";
@@ -99,14 +101,22 @@ function RootComponent() {
 function ProtectedAppShell({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const [checking, setChecking] = useState(true);
+  const [blocked, setBlocked] = useState(false);
 
   useEffect(() => {
-    return observeAuthState((user) => {
+    return observeAuthState(async (user) => {
       if (!user) {
         navigate({ to: "/login" });
         return;
       }
-      setChecking(false);
+
+      try {
+        const snap = await getDoc(doc(getDb(), "users", user.uid));
+        const data = snap.exists() ? snap.data() : null;
+        setBlocked(!data || data.profileStatus === "needs_role" || !data.role);
+      } finally {
+        setChecking(false);
+      }
     });
   }, [navigate]);
 
@@ -114,6 +124,28 @@ function ProtectedAppShell({ children }: { children: React.ReactNode }) {
     return (
       <div className="grid min-h-screen place-items-center bg-background text-[13px] text-muted-foreground">
         Checking session...
+      </div>
+    );
+  }
+
+  if (blocked) {
+    return (
+      <div className="grid min-h-screen place-items-center bg-background px-4 text-center">
+        <div className="max-w-md">
+          <p className="text-[15px] font-medium">Complete registration first</p>
+          <p className="mt-2 text-[13px] text-muted-foreground">
+            Your Firebase account is signed in, but its role/profile setup is not ready for the workspace yet.
+          </p>
+          <button
+            onClick={async () => {
+              await logout();
+              navigate({ to: "/login" });
+            }}
+            className="mt-4 inline-flex rounded-md border border-border bg-surface/60 px-4 py-2 text-[13px] hover:bg-surface-2"
+          >
+            Return to login
+          </button>
+        </div>
       </div>
     );
   }

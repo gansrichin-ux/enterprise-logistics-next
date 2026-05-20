@@ -28,7 +28,7 @@ function CabinetPage() {
     company_name: string | null; company_description: string | null;
     city: string | null; region: string | null; country: string | null;
     primary_role: string | null; verification_status: string;
-    completion_percent: number;
+    completion_percent: number; profile_status: string;
   } | null>(null);
 
   useEffect(() => {
@@ -54,6 +54,7 @@ function CabinetPage() {
           primary_role: (data?.role as string | undefined) ?? null,
           verification_status: (data?.profileStatus as string | undefined) ?? "pending",
           completion_percent: (data?.profileCompletenessPercent as number | undefined) ?? 10,
+          profile_status: (data?.profileStatus as string | undefined) ?? "pending",
         });
       } finally {
         setLoading(false);
@@ -74,7 +75,22 @@ function CabinetPage() {
       <div className="grid min-h-screen place-items-center bg-background px-4 text-center">
         <div>
           <p className="text-[14px] text-muted-foreground">No profile found.</p>
-          <Link to="/onboarding" className="mt-3 inline-flex rounded-md bg-primary px-4 py-2 text-[13px] font-medium text-primary-foreground">Complete onboarding</Link>
+          <Link to="/register" className="mt-3 inline-flex rounded-md bg-primary px-4 py-2 text-[13px] font-medium text-primary-foreground">Complete registration</Link>
+        </div>
+      </div>
+    );
+  }
+  if (profile.profile_status === "needs_role" || !profile.primary_role) {
+    return (
+      <div className="grid min-h-screen place-items-center bg-background px-4 text-center">
+        <div className="max-w-md">
+          <p className="text-[15px] font-medium">Complete role setup</p>
+          <p className="mt-2 text-[13px] text-muted-foreground">
+            Google sign-in is connected, but role selection for Google accounts will be completed in Stage 2.
+          </p>
+          <button onClick={handleLogout} className="mt-4 inline-flex rounded-md border border-border bg-surface/60 px-4 py-2 text-[13px] hover:bg-surface-2">
+            Logout
+          </button>
         </div>
       </div>
     );
