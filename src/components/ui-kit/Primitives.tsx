@@ -32,13 +32,13 @@ export function Card({ className, children, ...rest }: HTMLAttributes<HTMLDivEle
 
 export function StatusBadge({ status }: { status: "in_transit" | "loading" | "delivered" | "pending" | "delayed" | "verified" | "draft" }) {
   const map = {
-    in_transit: { label: "In transit", c: "bg-info/15 text-info border-info/30" },
-    loading:    { label: "Loading",    c: "bg-warning/15 text-warning border-warning/30" },
-    delivered:  { label: "Delivered",  c: "bg-success/15 text-success border-success/30" },
-    pending:    { label: "Pending",    c: "bg-surface-3 text-muted-foreground border-border-strong" },
-    delayed:    { label: "Delayed",    c: "bg-destructive/15 text-destructive border-destructive/30" },
-    verified:   { label: "Verified",   c: "bg-success/15 text-success border-success/30" },
-    draft:      { label: "Draft",      c: "bg-surface-3 text-muted-foreground border-border-strong" },
+    in_transit: { label: "В пути", c: "bg-info/15 text-info border-info/30" },
+    loading:    { label: "Погрузка", c: "bg-warning/15 text-warning border-warning/30" },
+    delivered:  { label: "Доставлено", c: "bg-success/15 text-success border-success/30" },
+    pending:    { label: "Ожидает", c: "bg-surface-3 text-muted-foreground border-border-strong" },
+    delayed:    { label: "Задержка", c: "bg-destructive/15 text-destructive border-destructive/30" },
+    verified:   { label: "Проверено", c: "bg-success/15 text-success border-success/30" },
+    draft:      { label: "Черновик", c: "bg-surface-3 text-muted-foreground border-border-strong" },
   } as const;
   const s = map[status];
   return (
@@ -82,7 +82,7 @@ export function MapPreview({ className, label }: { className?: string; label?: s
       </svg>
       <div className="absolute left-3 top-3 rounded-md border border-border bg-background/70 px-2 py-1 backdrop-blur">
         <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Live route</div>
-        <div className="text-[12px]">{label ?? "Hamburg → Rotterdam → Madrid"}</div>
+        <div className="text-[12px]">{label ?? "Пункт отправки → Пункт назначения"}</div>
       </div>
       <div className="absolute right-3 bottom-3 flex gap-1">
         {["1×","2×","SAT"].map(x => <button key={x} className="rounded border border-border bg-background/70 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground backdrop-blur">{x}</button>)}

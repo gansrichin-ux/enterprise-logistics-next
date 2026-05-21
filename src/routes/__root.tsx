@@ -1,22 +1,21 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
+  HeadContent,
+  Link,
   Outlet,
+  Scripts,
   createRootRouteWithContext,
+  useNavigate,
   useRouter,
   useRouterState,
-  useNavigate,
-  Link,
-  HeadContent,
-  Scripts,
 } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { doc, getDoc } from "firebase/firestore";
 import appCss from "../styles.css?url";
 import { AppShell } from "@/components/layout/AppShell";
 import { observeAuthState } from "@/lib/firebase/auth";
-import { getDb } from "@/lib/firebase/firestore";
+import { isProfileReady, readUserProfile } from "@/lib/firebase/profile";
 
-const PUBLIC_PREFIXES = ["/login", "/register", "/forgot-password", "/complete-profile", "/onboarding", "/cabinet"];
+const PUBLIC_PREFIXES = ["/login", "/register", "/forgot-password", "/complete-profile", "/onboarding"];
 const LANDING_PATH = "/";
 
 function NotFoundComponent() {
@@ -26,7 +25,9 @@ function NotFoundComponent() {
         <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary">Ошибка 404</p>
         <h1 className="mt-3 text-3xl font-semibold">Страница не найдена</h1>
         <p className="mt-2 text-sm text-muted-foreground">Такого раздела нет в текущем прототипе.</p>
-        <Link to="/" className="mt-6 inline-flex rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">На главную</Link>
+        <Link to="/" className="mt-6 inline-flex rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">
+          На главную
+        </Link>
       </div>
     </div>
   );
@@ -41,9 +42,14 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
         <h1 className="text-xl font-semibold">Что-то пошло не так</h1>
         <p className="mt-2 text-sm text-muted-foreground">{error.message}</p>
         <button
-          onClick={() => { router.invalidate(); reset(); }}
+          onClick={() => {
+            router.invalidate();
+            reset();
+          }}
           className="mt-6 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
-        >Повторить</button>
+        >
+          Повторить
+        </button>
       </div>
     </div>
   );
@@ -54,15 +60,22 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Jük Bar — поиск грузов, транспорта и управление перевозками" },
-      { name: "description", content: "Jük Bar помогает грузовладельцам, перевозчикам, логистам, экспедиторам и юристам работать с перевозками в одном кабинете." },
+      { title: "Jük Bar - поиск грузов, транспорта и управление перевозками" },
+      {
+        name: "description",
+        content:
+          "Jük Bar помогает грузовладельцам, перевозчикам, логистам, экспедиторам и юристам работать с перевозками в одном кабинете.",
+      },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "stylesheet", href: "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css", crossOrigin: "" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap",
+      },
     ],
   }),
   shellComponent: RootShell,
@@ -74,8 +87,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ru" className="dark">
-      <head><HeadContent /></head>
-      <body>{children}<Scripts /></body>
+      <head>
+        <HeadContent />
+      </head>
+      <body>
+        {children}
+        <Scripts />
+      </body>
     </html>
   );
 }
@@ -83,7 +101,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const isPublic = pathname === LANDING_PATH || PUBLIC_PREFIXES.some((p) => pathname.startsWith(p));
+  const isPublic = pathname === LANDING_PATH || PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -101,24 +119,21 @@ function RootComponent() {
 function ProtectedAppShell({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const [checking, setChecking] = useState(true);
-  const [blocked, setBlocked] = useState(false);
 
   useEffect(() => {
     return observeAuthState(async (user) => {
       if (!user) {
+        setChecking(false);
         navigate({ to: "/login" });
         return;
       }
 
       try {
-        const snap = await getDoc(doc(getDb(), "users", user.uid));
-        const data = snap.exists() ? snap.data() : null;
-        const needsRole = !data || !data.role || (data.profileStatus === "needs_role" && !data.onboardingCompleted);
-        if (needsRole) {
+        const profile = await readUserProfile(user);
+        if (!isProfileReady(profile)) {
           navigate({ to: "/complete-profile" });
           return;
         }
-        setBlocked(false);
       } finally {
         setChecking(false);
       }
@@ -129,27 +144,6 @@ function ProtectedAppShell({ children }: { children: React.ReactNode }) {
     return (
       <div className="grid min-h-screen place-items-center bg-background text-[13px] text-muted-foreground">
         Проверяем сессию...
-      </div>
-    );
-  }
-
-  if (blocked) {
-    return (
-      <div className="grid min-h-screen place-items-center bg-background px-4 text-center">
-        <div className="max-w-md">
-          <p className="text-[15px] font-medium">Завершите профиль</p>
-          <p className="mt-2 text-[13px] text-muted-foreground">
-            Сессия активна, но роль или профиль еще не готовы для рабочего пространства.
-          </p>
-          <button
-            onClick={async () => {
-              navigate({ to: "/complete-profile" });
-            }}
-            className="mt-4 inline-flex rounded-md border border-border bg-surface/60 px-4 py-2 text-[13px] hover:bg-surface-2"
-          >
-            Завершить профиль
-          </button>
-        </div>
       </div>
     );
   }
