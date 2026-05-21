@@ -336,6 +336,30 @@ export async function sendPasswordResetLink(email: string, redirectUrl?: string)
   );
 }
 
+export function getPasswordResetErrorMessage(error: unknown) {
+  const code =
+    typeof error === "object" && error && "code" in error
+      ? String((error as { code?: unknown }).code)
+      : "";
+  const message = error instanceof Error ? error.message : String(error);
+
+  switch (code) {
+    case "auth/invalid-email":
+      return "Введите корректный email";
+    case "auth/user-not-found":
+      return "Пользователь с таким email не найден";
+    case "auth/missing-email":
+      return "Введите email";
+    case "auth/unauthorized-continue-uri":
+      return "Домен для восстановления пароля не разрешён в Firebase. Проверьте настройки проекта.";
+    default:
+      if (message.includes("Firebase is not configured")) {
+        return "Firebase не настроен. Проверьте локальный .env.";
+      }
+      return "Не удалось отправить письмо для восстановления пароля. Попробуйте позже.";
+  }
+}
+
 export function getAuthErrorMessage(error: unknown) {
   const code =
     typeof error === "object" && error && "code" in error

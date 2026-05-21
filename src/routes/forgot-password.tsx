@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { getAuthErrorMessage, sendPasswordResetLink } from "@/lib/firebase/auth";
+import { getPasswordResetErrorMessage, sendPasswordResetLink } from "@/lib/firebase/auth";
 import { AuthShell, Field } from "./login";
 import { Loader2, ArrowRight, MailCheck } from "lucide-react";
 
@@ -17,13 +17,24 @@ function ForgotPasswordPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    const normalizedEmail = email.trim();
+    if (!normalizedEmail) {
+      setError("Введите email");
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+      setError("Введите корректный email");
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
-      await sendPasswordResetLink(email, window.location.origin + "/login");
+      await sendPasswordResetLink(normalizedEmail);
+      setEmail(normalizedEmail);
       setSent(true);
     } catch (error) {
-      setError(getAuthErrorMessage(error));
+      setError(getPasswordResetErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -36,14 +47,14 @@ function ForgotPasswordPage() {
           <MailCheck className="mx-auto h-8 w-8 text-primary" />
           <div className="mt-3 text-[14px] font-medium">Проверьте почту</div>
           <div className="mt-1 text-[12px] text-muted-foreground">
-            Если аккаунт для {email} существует, ссылка для сброса уже отправлена.
+            Письмо для восстановления пароля отправлено. Проверьте почту.
           </div>
           <Link to="/login" className="mt-5 inline-flex text-[13px] text-primary hover:underline">
             Вернуться ко входу
           </Link>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="space-y-3.5">
+        <form onSubmit={handleSubmit} noValidate className="space-y-3.5">
           <Field label="Email">
             <input
               type="email"
