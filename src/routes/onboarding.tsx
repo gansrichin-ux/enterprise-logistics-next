@@ -7,7 +7,7 @@ import { getDb } from "@/lib/firebase/firestore";
 import { ArrowRight, Loader2, ShieldCheck } from "lucide-react";
 
 export const Route = createFileRoute("/onboarding")({
-  head: () => ({ meta: [{ title: "Onboarding — Jük Bar" }] }),
+  head: () => ({ meta: [{ title: "Настройка профиля — Jük Bar" }] }),
   component: OnboardingPage,
 });
 
@@ -56,12 +56,11 @@ function OnboardingPage() {
           <div className="flex h-11 w-11 items-center justify-center rounded-md border border-primary/20 bg-primary/10">
             <ShieldCheck className="h-5 w-5 text-primary" />
           </div>
-          <div className="mt-6 font-mono text-[10px] uppercase tracking-[0.22em] text-primary">Firebase onboarding</div>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight">Большой onboarding перенесен в Stage 3.</h1>
+          <div className="mt-6 font-mono text-[10px] uppercase tracking-[0.22em] text-primary">Настройка профиля</div>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight">Профиль компании будет расширен позже.</h1>
           <p className="mt-3 text-[14px] leading-relaxed text-muted-foreground">
-            Старый onboarding отключен от auth flow. На Stage 2 для Google users
-            используется минимальный Firebase-only шаг выбора роли и username на странице
-            <span className="font-mono text-foreground"> /complete-profile</span>.
+            Сейчас для доступа к кабинету нужен только минимальный профиль: имя,
+            username и роль. Полная анкета компании будет подключена отдельным этапом.
           </p>
           <div className="mt-7 flex flex-wrap gap-3">
             <Link

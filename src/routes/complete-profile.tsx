@@ -35,7 +35,7 @@ function CompleteProfilePage() {
   const roleLocked = Boolean(existingRole);
   const roleHint = useMemo(() => {
     if (!roleLocked) return "Выберите роль для кабинета Jük Bar.";
-    return "Роль уже сохранена в users/{uid}; на Stage 2 мы не меняем role без отдельного плана Firestore rules.";
+    return "Роль уже сохранена в профиле. На этом шаге можно завершить имя и username.";
   }, [roleLocked]);
 
   useEffect(() => {
@@ -94,7 +94,7 @@ function CompleteProfilePage() {
 
   if (checking) {
     return (
-      <AuthShell title="Проверяем профиль" subtitle="Загружаем Firebase session и users/{uid}.">
+      <AuthShell title="Проверяем профиль" subtitle="Проверяем аккаунт и данные профиля.">
         <div className="grid place-items-center py-8">
           <Loader2 className="h-5 w-5 animate-spin text-primary" />
         </div>
@@ -103,7 +103,7 @@ function CompleteProfilePage() {
   }
 
   return (
-    <AuthShell title="Завершите профиль" subtitle="Это минимальный Firebase-only шаг для Google users без готовой роли.">
+    <AuthShell title="Завершите профиль" subtitle="Выберите роль и username, чтобы открыть кабинет.">
       <form onSubmit={handleSubmit} className="space-y-3.5">
         <Field label="Имя">
           <input

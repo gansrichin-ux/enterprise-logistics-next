@@ -44,7 +44,7 @@ function LoginPage() {
   }
 
   return (
-    <AuthShell title="Вход в Jük Bar" subtitle="Войдите в кабинет компании через Firebase Auth.">
+    <AuthShell title="Вход в Jük Bar" subtitle="Войдите в кабинет компании.">
       <form onSubmit={handleSubmit} className="space-y-3.5">
         <Field label="Email">
           <input
@@ -111,7 +111,7 @@ export function AuthShell({ title, subtitle, children }: { title: string; subtit
             <div className="mt-7">{children}</div>
           </div>
           <p className="mt-6 text-center font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-            Protected by Jük Bar · Freight OS
+            Защищено Jük Bar
           </p>
         </div>
       </div>

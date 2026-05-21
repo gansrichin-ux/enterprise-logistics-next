@@ -10,8 +10,8 @@ type Props = {
   height?: number;
 };
 
-const DEFAULT_PICKUP: LatLng = { lat: 53.5511, lng: 9.9937, label: "Hamburg, DE" };
-const DEFAULT_DROPOFF: LatLng = { lat: 40.4168, lng: -3.7038, label: "Madrid, ES" };
+const DEFAULT_PICKUP: LatLng = { lat: 43.2389, lng: 76.8897, label: "Пункт отправки" };
+const DEFAULT_DROPOFF: LatLng = { lat: 51.1694, lng: 71.4491, label: "Пункт назначения" };
 
 /**
  * Real interactive Leaflet map. Uses OpenStreetMap tiles — no API key required.
@@ -57,7 +57,7 @@ export function RouteMap({
           <div className="text-center">
             <MapPin className="mx-auto h-6 w-6 text-primary" />
             <div className="mt-2 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-              {failed ? "Map unavailable — fallback view" : "Loading map…"}
+              {failed ? "Карта временно недоступна" : "Загружаем карту..."}
             </div>
             <div className="mt-1 text-[13px]">
               {pickup.label} → {dropoff.label}
@@ -94,10 +94,10 @@ export function RouteMap({
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <Marker position={[pickup.lat, pickup.lng]} icon={pinIcon("start")}>
-          <Popup>Pickup · {pickup.label}</Popup>
+          <Popup>Отправление · {pickup.label}</Popup>
         </Marker>
         <Marker position={[dropoff.lat, dropoff.lng]} icon={pinIcon("end")}>
-          <Popup>Dropoff · {dropoff.label}</Popup>
+          <Popup>Назначение · {dropoff.label}</Popup>
         </Marker>
         <Polyline
           positions={[
@@ -115,7 +115,7 @@ export function RouteMap({
 
       {/* Overlays */}
       <div className="pointer-events-none absolute left-3 top-3 z-[400] rounded-md border border-border bg-background/85 px-2.5 py-1.5 backdrop-blur">
-        <div className="font-mono text-[10px] uppercase tracking-wider text-primary">Route preview</div>
+        <div className="font-mono text-[10px] uppercase tracking-wider text-primary">Предпросмотр маршрута</div>
         <div className="text-[12px]">{pickup.label} → {dropoff.label}</div>
       </div>
     </div>

@@ -57,8 +57,8 @@ export function PublicFooter() {
       </div>
       <div className="border-t border-border/60">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-5 py-5 text-[11px] text-muted-foreground lg:flex-row lg:px-10">
-          <div className="font-mono uppercase tracking-wider">© {new Date().getFullYear()} Jük Bar · Freight OS</div>
-          <div className="font-mono uppercase tracking-wider">Kazakhstan · International freight</div>
+          <div className="font-mono uppercase tracking-wider">© {new Date().getFullYear()} Jük Bar · Логистическая платформа</div>
+          <div className="font-mono uppercase tracking-wider">Казахстан · Международные перевозки</div>
         </div>
       </div>
     </footer>

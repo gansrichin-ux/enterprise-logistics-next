@@ -30,7 +30,7 @@ function ForgotPasswordPage() {
   }
 
   return (
-    <AuthShell title="Сброс пароля" subtitle="Firebase отправит письмо для восстановления доступа.">
+    <AuthShell title="Сброс пароля" subtitle="Отправим ссылку для восстановления доступа на вашу почту.">
       {sent ? (
         <div className="rounded-lg border border-primary/30 bg-primary/5 p-5 text-center">
           <MailCheck className="mx-auto h-8 w-8 text-primary" />

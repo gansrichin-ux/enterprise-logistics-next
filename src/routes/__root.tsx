@@ -23,10 +23,10 @@ function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary">Error 404</p>
-        <h1 className="mt-3 text-3xl font-semibold">Route not found</h1>
-        <p className="mt-2 text-sm text-muted-foreground">This shipment has no known destination.</p>
-        <Link to="/" className="mt-6 inline-flex rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">Return home</Link>
+        <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary">Ошибка 404</p>
+        <h1 className="mt-3 text-3xl font-semibold">Страница не найдена</h1>
+        <p className="mt-2 text-sm text-muted-foreground">Такого раздела нет в текущем прототипе.</p>
+        <Link to="/" className="mt-6 inline-flex rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">На главную</Link>
       </div>
     </div>
   );
@@ -38,12 +38,12 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold">Something went wrong</h1>
+        <h1 className="text-xl font-semibold">Что-то пошло не так</h1>
         <p className="mt-2 text-sm text-muted-foreground">{error.message}</p>
         <button
           onClick={() => { router.invalidate(); reset(); }}
           className="mt-6 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
-        >Try again</button>
+        >Повторить</button>
       </div>
     </div>
   );
@@ -54,8 +54,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Jük Bar — Smart logistics & cargo platform" },
-      { name: "description", content: "Jük Bar connects cargo owners, carriers, logisticians and forwarders. Find transport, manage cargo, track routes, verify companies." },
+      { title: "Jük Bar — поиск грузов, транспорта и управление перевозками" },
+      { name: "description", content: "Jük Bar помогает грузовладельцам, перевозчикам, логистам, экспедиторам и юристам работать с перевозками в одном кабинете." },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -73,7 +73,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="ru" className="dark">
       <head><HeadContent /></head>
       <body>{children}<Scripts /></body>
     </html>
@@ -128,7 +128,7 @@ function ProtectedAppShell({ children }: { children: React.ReactNode }) {
   if (checking) {
     return (
       <div className="grid min-h-screen place-items-center bg-background text-[13px] text-muted-foreground">
-        Checking session...
+        Проверяем сессию...
       </div>
     );
   }
@@ -139,7 +139,7 @@ function ProtectedAppShell({ children }: { children: React.ReactNode }) {
         <div className="max-w-md">
           <p className="text-[15px] font-medium">Завершите профиль</p>
           <p className="mt-2 text-[13px] text-muted-foreground">
-            Firebase session активна, но роль или профиль еще не готовы для рабочего пространства.
+            Сессия активна, но роль или профиль еще не готовы для рабочего пространства.
           </p>
           <button
             onClick={async () => {

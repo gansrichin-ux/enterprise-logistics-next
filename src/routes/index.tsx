@@ -19,7 +19,7 @@ import {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Jük Bar — логистическая платформа для перевозок" },
+      { title: "Jük Bar — поиск грузов, транспорта и управление перевозками" },
       {
         name: "description",
         content:
@@ -132,7 +132,7 @@ function LandingPage() {
                 </span>
               </div>
               <h1 className="mt-6 text-[44px] font-semibold leading-[1.02] tracking-tight md:text-[64px]">
-                Jük Bar для <span className="text-gradient-emerald">умной логистики</span> и перевозок.
+                Платформа для <span className="text-gradient-emerald">поиска грузов и транспорта</span>.
               </h1>
               <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-muted-foreground md:text-base">
                 Единое рабочее пространство для грузовладельцев, перевозчиков, логистов,
@@ -169,12 +169,12 @@ function LandingPage() {
                   <div className="flex items-center justify-between gap-3 px-1.5 pb-2">
                     <div>
                       <div className="font-mono text-[10px] uppercase tracking-wider text-primary">
-                        Route preview
+                        Предпросмотр маршрута
                       </div>
                       <div className="text-[13px] font-medium">Планирование перевозки</div>
                     </div>
                     <span className="inline-flex items-center gap-1.5 rounded-md border border-primary/30 bg-primary/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-primary">
-                      <span className="h-1.5 w-1.5 rounded-full bg-primary" /> Draft
+                      <span className="h-1.5 w-1.5 rounded-full bg-primary" /> Черновик
                     </span>
                   </div>
                   <RouteMap height={300} pickup={heroRoute.pickup} dropoff={heroRoute.dropoff} />
@@ -210,13 +210,13 @@ function LandingPage() {
 
       <section id="platform" className="mx-auto max-w-7xl px-5 py-24 lg:px-10">
         <div className="max-w-2xl">
-          <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary">Platform · Freight OS</div>
+          <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary">Платформа</div>
           <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
-            Операционный слой для перевозок, а не витрина с цифрами.
+            Рабочее пространство для перевозок без лишних таблиц.
           </h2>
           <p className="mt-3 text-[15px] text-muted-foreground">
-            Stage 2 убирает demo KPI и оставляет продуктовую основу: роли, заявки, документы,
-            коммуникации и безопасный Firebase auth flow.
+            Команды работают с заявками, ролями, документами и коммуникациями в одном кабинете.
+            Никаких показательных метрик без реальных данных.
           </p>
         </div>
         <div className="mt-12 grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">
@@ -268,7 +268,7 @@ function LandingPage() {
       <section id="operations" className="mx-auto max-w-7xl px-5 py-24 lg:px-10">
         <div className="grid items-center gap-12 lg:grid-cols-2">
           <div>
-            <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary">Operations</div>
+            <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary">Рабочее пространство</div>
             <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
               От заявки до закрывающих документов.
             </h2>
@@ -308,7 +308,7 @@ function LandingPage() {
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1">
             <MapPin className="h-3 w-3 text-primary" />
             <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary">
-              Jük Bar workspace
+              Кабинет Jük Bar
             </span>
           </div>
           <h2 className="mt-6 text-3xl font-semibold tracking-tight md:text-5xl">

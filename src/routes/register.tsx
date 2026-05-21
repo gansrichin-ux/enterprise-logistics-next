@@ -62,7 +62,7 @@ function RegisterPage() {
   }
 
   return (
-    <AuthShell title="Создать аккаунт Jük Bar" subtitle="Выберите роль и создайте Firebase-профиль компании.">
+    <AuthShell title="Создать аккаунт Jük Bar" subtitle="Укажите роль, username и данные для входа.">
       <form onSubmit={handleSubmit} className="space-y-3.5">
         <div className="grid gap-3.5 sm:grid-cols-2">
           <Field label="Имя">
@@ -114,7 +114,7 @@ function RegisterPage() {
         Уже есть аккаунт? <Link to="/login" className="text-primary hover:underline">Войти</Link>
       </p>
       <p className="mt-3 text-center text-[10px] text-muted-foreground">
-        Регистрация использует Firebase Auth и создает профиль пользователя в Firestore.
+        После регистрации откроется кабинет компании.
       </p>
     </AuthShell>
   );
